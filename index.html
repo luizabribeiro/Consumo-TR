@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Interativo de Energia</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 80%;
+            max-width: 800px;
+            background: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            text-align: center;
+        }
+        select {
+            padding: 10px;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+        canvas {
+            width: 100% !important;
+            height: 400px !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Painel Interativo de Energia</h2>
+        <select id="dataSelect" onchange="updateChart()">
+            <option value="consumo">Consumo</option>
+            <option value="pld">PLD</option>
+            <option value="demanda">Contrato de Demanda</option>
+            <option value="energia">Contrato de Energia</option>
+        </select>
+        <canvas id="myChart"></canvas>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('myChart').getContext('2d');
+        
+        const dataSamples = {
+            consumo: [638, 640, 640, 645, 637, 630, 628, 640, 650, 660, 670],
+            pld: [200, 195, 190, 205, 210, 220, 225, 215, 200, 195, 190],
+            demanda: [500, 505, 510, 515, 520, 525, 530, 535, 540, 545, 550],
+            energia: [800, 790, 780, 770, 760, 750, 740, 730, 720, 710, 700]
+        };
+        
+        const labels = ['00:00', '01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00', '08:00', '09:00', '10:00'];
+        
+        let myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Consumo (MW)',
+                        data: dataSamples.consumo,
+                        borderColor: 'blue',
+                        borderWidth: 2,
+                        fill: false,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'PLD (R$/MWh)',
+                        data: dataSamples.pld,
+                        borderColor: 'red',
+                        borderWidth: 2,
+                        fill: false,
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        title: { display: true, text: 'Hora' }
+                    },
+                    y: {
+                        title: { display: true, text: 'Consumo (MW)' },
+                        position: 'left'
+                    },
+                    y1: {
+                        title: { display: true, text: 'PLD (R$/MWh)' },
+                        position: 'right',
+                        grid: { drawOnChartArea: false }
+                    }
+                }
+            }
+        });
+
+        function updateChart() {
+            const selectedData = document.getElementById('dataSelect').value;
+            
+            if (selectedData === 'pld') {
+                myChart.data.datasets[1].hidden = false;
+            } else {
+                myChart.data.datasets[1].hidden = true;
+            }
+            
+            myChart.data.datasets[0].data = dataSamples[selectedData];
+            myChart.data.datasets[0].label = document.getElementById('dataSelect').options[document.getElementById('dataSelect').selectedIndex].text;
+            myChart.update();
+        }
+    </script>
+</body>
+</html>
